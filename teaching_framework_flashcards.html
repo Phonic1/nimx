@@ -1,0 +1,263 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<meta name="theme-color" content="#2d8e94" />
+<title>Teaching Framework Flashcards</title>
+<style>
+  :root{
+    --teal:#2f8f95;
+    --teal-dark:#17646a;
+    --teal-soft:#dff2f2;
+    --ink:#173239;
+    --muted:#60777c;
+    --paper:#f7fbfb;
+    --card:#ffffff;
+    --line:#d8e7e8;
+    --success:#2e7d5b;
+    --review:#a86724;
+    --shadow:0 14px 36px rgba(29,73,78,.14);
+  }
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+  html,body{margin:0;min-height:100%;background:linear-gradient(180deg,#eaf6f6 0%,#f7fbfb 35%,#ffffff 100%);color:var(--ink);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif}
+  body{min-height:100dvh}
+  button,select{font:inherit}
+  button{cursor:pointer}
+  .app{max-width:760px;margin:0 auto;min-height:100dvh;padding:env(safe-area-inset-top) 14px calc(22px + env(safe-area-inset-bottom))}
+  header{padding:16px 4px 8px;display:flex;align-items:flex-start;justify-content:space-between;gap:10px}
+  .eyebrow{font-size:.76rem;letter-spacing:.11em;text-transform:uppercase;font-weight:800;color:var(--teal-dark)}
+  h1{font-size:clamp(1.6rem,7vw,2.35rem);line-height:1.04;margin:4px 0 0;letter-spacing:-.035em}
+  .sub{color:var(--muted);font-size:.93rem;margin-top:7px;line-height:1.35}
+  .iconBtn{border:1px solid var(--line);background:#fff;border-radius:14px;min-width:48px;height:48px;display:grid;place-items:center;color:var(--ink);box-shadow:0 5px 16px rgba(30,80,85,.08)}
+  .toolbar{display:grid;grid-template-columns:1fr auto;gap:9px;margin:10px 0 12px}
+  select,.pillBtn{min-height:48px;border-radius:14px;border:1px solid var(--line);background:#fff;color:var(--ink);padding:0 13px;font-weight:700}
+  .pillBtn{display:flex;align-items:center;justify-content:center;gap:8px;min-width:104px}
+  .stats{display:flex;align-items:center;justify-content:space-between;gap:10px;margin:8px 2px 8px;font-size:.86rem;color:var(--muted);font-weight:700}
+  .progressTrack{height:8px;background:#dcebec;border-radius:999px;overflow:hidden;margin-bottom:14px}
+  .progressBar{height:100%;width:0;background:linear-gradient(90deg,var(--teal),#65b6ba);transition:width .25s ease}
+  .cardWrap{perspective:1200px;touch-action:pan-y}
+  .flashcard{position:relative;min-height:420px;width:100%;transform-style:preserve-3d;transition:transform .48s cubic-bezier(.2,.75,.2,1);border-radius:26px;box-shadow:var(--shadow)}
+  .flashcard.flipped{transform:rotateY(180deg)}
+  .face{position:absolute;inset:0;backface-visibility:hidden;-webkit-backface-visibility:hidden;border-radius:26px;background:var(--card);border:1px solid rgba(35,112,118,.14);padding:22px;display:flex;flex-direction:column;overflow:hidden}
+  .face::before{content:"";position:absolute;left:0;right:0;top:0;height:9px;background:var(--accent,var(--teal))}
+  .back{transform:rotateY(180deg)}
+  .catRow{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-top:3px}
+  .badge{display:inline-flex;align-items:center;gap:8px;border-radius:999px;padding:7px 10px;font-size:.78rem;font-weight:900;background:color-mix(in srgb,var(--accent) 14%,white);color:color-mix(in srgb,var(--accent) 78%,black)}
+  .num{font-size:.8rem;color:var(--muted);font-weight:800}
+  .prompt{margin:auto 0;text-align:center;padding:26px 4px 16px}
+  .prompt small{display:block;color:var(--muted);font-weight:700;margin-bottom:14px}
+  .prompt h2{font-size:clamp(1.9rem,8vw,3.05rem);line-height:1.08;letter-spacing:-.04em;margin:0}
+  .tap{margin-top:auto;text-align:center;color:var(--muted);font-size:.82rem;font-weight:700;padding-top:14px}
+  .back h2{font-size:1.45rem;line-height:1.15;margin:26px 0 14px;letter-spacing:-.02em}
+  .answer{font-size:clamp(1.08rem,4.8vw,1.32rem);line-height:1.5;margin:auto 0;color:#27454b}
+  .answer strong{color:var(--ink)}
+  .memoryCue{margin-top:18px;padding:13px 14px;border-radius:16px;background:var(--teal-soft);font-size:.9rem;line-height:1.35;color:#2b5c61}
+  .controls{display:grid;grid-template-columns:1fr 1.35fr 1fr;gap:9px;margin-top:14px}
+  .control{min-height:54px;border:none;border-radius:16px;font-weight:900;background:#fff;border:1px solid var(--line);color:var(--ink)}
+  .control.primary{background:var(--teal-dark);color:#fff;border-color:var(--teal-dark)}
+  .rateRow{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-top:9px}
+  .rate{min-height:48px;border-radius:14px;border:1px solid var(--line);background:#fff;font-weight:850}
+  .rate.review{color:var(--review)}
+  .rate.known{color:var(--success)}
+  .rate.active{box-shadow:inset 0 0 0 2px currentColor;background:#f8ffff}
+  .panel{position:fixed;inset:0;background:rgba(8,37,40,.42);display:none;align-items:flex-end;z-index:20;padding:0}
+  .panel.open{display:flex}
+  .sheet{background:#fff;width:100%;max-height:86dvh;border-radius:28px 28px 0 0;padding:18px 16px calc(18px + env(safe-area-inset-bottom));overflow:auto;box-shadow:0 -18px 50px rgba(0,0,0,.18)}
+  .sheetHead{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:8px;position:sticky;top:-18px;background:#fff;padding:12px 0 8px;z-index:2}
+  .sheet h2{margin:0;font-size:1.35rem}
+  .close{border:none;background:#eef6f6;border-radius:12px;width:42px;height:42px;font-weight:900}
+  .categoryGroup{margin:15px 0 20px}
+  .categoryGroup h3{font-size:1rem;margin:0 0 8px;color:var(--teal-dark)}
+  .cardList{display:grid;gap:7px}
+  .jump{width:100%;text-align:left;border:1px solid var(--line);background:#fff;border-radius:13px;padding:12px 13px;color:var(--ink);font-weight:750;line-height:1.3}
+  .jump span{display:block;color:var(--muted);font-size:.78rem;font-weight:650;margin-top:3px}
+  .legend{font-size:.82rem;color:var(--muted);line-height:1.45;padding:10px 2px 2px}
+  @media (max-width:390px){
+    .app{padding-left:10px;padding-right:10px}
+    .face{padding:18px}
+    .flashcard{min-height:405px}
+    .controls{grid-template-columns:.9fr 1.25fr .9fr;gap:7px}
+    .control{font-size:.9rem}
+  }
+  @media (min-width:700px){.flashcard{min-height:470px}.face{padding:28px}.sheet{max-width:760px;margin:0 auto}}
+  @media (prefers-reduced-motion:reduce){.flashcard,.progressBar{transition:none}}
+</style>
+</head>
+<body>
+<div class="app">
+  <header>
+    <div>
+      <div class="eyebrow">Study deck</div>
+      <h1>Teaching Framework</h1>
+      <div class="sub">25 flashcards · 5 categories · one teaching point per card</div>
+    </div>
+    <button class="iconBtn" id="menuBtn" aria-label="Open card list">☰</button>
+  </header>
+
+  <div class="toolbar">
+    <select id="categorySelect" aria-label="Choose category"></select>
+    <button class="pillBtn" id="shuffleBtn" aria-label="Shuffle current deck">⇄ Shuffle</button>
+  </div>
+
+  <div class="stats"><span id="cardCounter">1 of 25</span><span id="mastery">0 known</span></div>
+  <div class="progressTrack" aria-hidden="true"><div class="progressBar" id="progressBar"></div></div>
+
+  <main>
+    <div class="cardWrap" id="cardWrap">
+      <section class="flashcard" id="flashcard" role="button" tabindex="0" aria-label="Flashcard. Tap to flip.">
+        <div class="face front" id="frontFace">
+          <div class="catRow"><div class="badge" id="frontBadge"></div><div class="num" id="frontNum"></div></div>
+          <div class="prompt">
+            <small>What does this teaching point involve?</small>
+            <h2 id="frontTitle"></h2>
+          </div>
+          <div class="tap">Tap the card to reveal the answer</div>
+        </div>
+        <div class="face back" id="backFace">
+          <div class="catRow"><div class="badge" id="backBadge"></div><div class="num" id="backNum"></div></div>
+          <h2 id="backTitle"></h2>
+          <div class="answer" id="backAnswer"></div>
+          <div class="memoryCue" id="memoryCue"></div>
+          <div class="tap">Tap again to return to the prompt</div>
+        </div>
+      </section>
+    </div>
+
+    <div class="controls">
+      <button class="control" id="prevBtn">← Previous</button>
+      <button class="control primary" id="flipBtn">Reveal</button>
+      <button class="control" id="nextBtn">Next →</button>
+    </div>
+    <div class="rateRow">
+      <button class="rate review" id="reviewBtn">↻ Review again</button>
+      <button class="rate known" id="knownBtn">✓ I know this</button>
+    </div>
+  </main>
+</div>
+
+<div class="panel" id="panel" role="dialog" aria-modal="true" aria-label="All flashcards">
+  <div class="sheet">
+    <div class="sheetHead"><h2>All cards</h2><button class="close" id="closePanel" aria-label="Close">✕</button></div>
+    <div id="allCards"></div>
+    <div class="legend">Tip: swipe left/right on the card to move through the deck. Your “I know this” and “Review again” choices are saved on this device.</div>
+  </div>
+</div>
+
+<script>
+const categories = [
+  {name:'Connect', color:'#2f8f95', icon:'●'},
+  {name:'I do', color:'#d45a4f', icon:'●'},
+  {name:'We do together', color:'#a46f3d', icon:'●'},
+  {name:'You do', color:'#4a8f6c', icon:'●'},
+  {name:'Reflect & Celebrate', color:'#8666a8', icon:'●'}
+];
+
+const cards = [
+  {c:'Connect',t:'Greet & Gain Attention',a:'Briefly check in with students and model with the communication system.',m:'Cue: check in + communication.'},
+  {c:'Connect',t:'Assess readiness to learn',a:'Position check, ensure communication systems are accessible, and complete equipment set-up.',m:'Cue: position + access + equipment.'},
+  {c:'Connect',t:'Priming to support focus, regulation & wellbeing',a:'Check emotional regulation (e.g. Zones of Regulation) and sensory regulation (e.g. brushing, tapping), then reinforce classroom expectations such as the classroom agreement.',m:'Cue: regulate first, then learn.'},
+  {c:'Connect',t:'WALT / WILF',a:'State the learning intention and success criteria, co-create WILF where appropriate, and clearly state the learning objectives.',m:'Cue: intention + success criteria.'},
+  {c:'Connect',t:'“I can” statements',a:'Use the student perspective, accessible language and a student-led approach.',m:'Cue: student voice, accessible wording.'},
+
+  {c:'I do',t:'Link to prior learning (knowledge & memory)',a:'Revisit and review previous learning.',m:'Cue: activate what they already know.'},
+  {c:'I do',t:'Differentiation',a:'Meet students at the point of need and embed individual learning adjustments, such as AAC, positioning and access.',m:'Cue: adjust for the learner in front of you.'},
+  {c:'I do',t:'Explicit instruction',a:'Teach new content explicitly in manageable “chunks”, be mindful of cognitive load, and provide clear instructions for students and staff.',m:'Cue: clear + chunked + manageable.'},
+  {c:'I do',t:'Modelling / worked examples',a:'Model practice of the concept, inspire curious learners, and model non-examples such as an “oops” mistake.',m:'Cue: show both what works and what does not.'},
+  {c:'I do',t:'Inner voice / think aloud',a:'Model thinking from the student perspective using accessible language.',m:'Cue: make the thinking visible.'},
+
+  {c:'We do together',t:'Guided instruction',a:'Do it with the student, not for them.',m:'Cue: shared participation.'},
+  {c:'We do together',t:'Practise the skill together',a:'Provide opportunities for revision and supported application, with repetition and variety.',m:'Cue: revise + apply + repeat.'},
+  {c:'We do together',t:'Engage differentiated supports',a:'Use age-respectful resources, language and tasks.',m:'Cue: respectful and appropriately adapted.'},
+  {c:'We do together',t:'Opportunity for students to engage in active learning',a:'Provide stimulating resources such as concrete materials; support learning through doing, link to real-world experiences, and use functional, purposeful tasks.',m:'Cue: hands-on + real-world + purposeful.'},
+  {c:'We do together',t:'Assess cognitive load',a:'Avoid giving more than one challenging task at a time (e.g. consider a traffic-light system), while still providing opportunities to extend and challenge.',m:'Cue: one hard thing at a time.'},
+
+  {c:'You do',t:'Remove scaffolds as required',a:'Use gradual release and know how and when to facilitate students for optimal independence.',m:'Cue: support fades as independence grows.'},
+  {c:'You do',t:'Check for understanding',a:'Revisit and review knowledge, use student self-assessment, and provide processing time.',m:'Cue: review + self-assess + wait.'},
+  {c:'You do',t:'Remodel task where needed',a:'Provide ongoing feedback and praise, and use instructional language such as rhythmical intentions.',m:'Cue: adjust, feedback, praise.'},
+  {c:'You do',t:'Students demonstrate skill and apply concepts',a:'Provide space and time for creativity and exploration, and encourage self-efficacy.',m:'Cue: apply independently and explore.'},
+  {c:'You do',t:'Students work towards growth & mastery',a:'Consolidate and apply learning.',m:'Cue: consolidate → apply → master.'},
+
+  {c:'Reflect & Celebrate',t:'Reflect against success criteria',a:'Revisit the “I can” statements.',m:'Cue: return to the goal.'},
+  {c:'Reflect & Celebrate',t:'Student feedback & sharing',a:'Provide time and opportunity for student sharing.',m:'Cue: make space for student voice.'},
+  {c:'Reflect & Celebrate',t:'Provide clear praise and feedback',a:'Give meaningful, task-specific praise (e.g. “I like the way you…”), and provide opportunities for students to praise each other.',m:'Cue: specific praise, not generic praise.'},
+  {c:'Reflect & Celebrate',t:'Celebrate success',a:'Use a clap, displays, SeeSaw posts and communication with families to celebrate success.',m:'Cue: make success visible.'},
+  {c:'Reflect & Celebrate',t:'Transition',a:'Use class or individual AAC, now-and-next visuals, model using the individual/class visual timetable, and use a goodbye/finish song.',m:'Cue: clear visual/AAC finish routine.'}
+];
+
+const els = {
+  card:document.getElementById('flashcard'), front:document.getElementById('frontFace'), back:document.getElementById('backFace'),
+  frontBadge:document.getElementById('frontBadge'), backBadge:document.getElementById('backBadge'),
+  frontNum:document.getElementById('frontNum'), backNum:document.getElementById('backNum'),
+  frontTitle:document.getElementById('frontTitle'), backTitle:document.getElementById('backTitle'), backAnswer:document.getElementById('backAnswer'), memoryCue:document.getElementById('memoryCue'),
+  counter:document.getElementById('cardCounter'), mastery:document.getElementById('mastery'), progress:document.getElementById('progressBar'),
+  select:document.getElementById('categorySelect'), flip:document.getElementById('flipBtn'), prev:document.getElementById('prevBtn'), next:document.getElementById('nextBtn'),
+  review:document.getElementById('reviewBtn'), known:document.getElementById('knownBtn'), shuffle:document.getElementById('shuffleBtn'),
+  panel:document.getElementById('panel'), menu:document.getElementById('menuBtn'), close:document.getElementById('closePanel'), allCards:document.getElementById('allCards'), wrap:document.getElementById('cardWrap')
+};
+
+let category='All categories';
+let deck=cards.map((_,i)=>i);
+let pos=0;
+let flipped=false;
+let status=JSON.parse(localStorage.getItem('teachingFrameworkStatus')||'{}');
+
+function categoryMeta(name){return categories.find(x=>x.name===name)}
+function saveStatus(){localStorage.setItem('teachingFrameworkStatus',JSON.stringify(status))}
+function rebuildDeck(reset=true){
+  deck = cards.map((x,i)=>({x,i})).filter(o=>category==='All categories'||o.x.c===category).map(o=>o.i);
+  if(reset) pos=0;
+  flipped=false;
+  render();
+}
+function populateSelect(){
+  els.select.innerHTML=['All categories',...categories.map(c=>c.name)].map(x=>`<option>${x}</option>`).join('');
+}
+function render(){
+  if(!deck.length)return;
+  const idx=deck[pos], card=cards[idx], meta=categoryMeta(card.c);
+  document.documentElement.style.setProperty('--accent',meta.color);
+  els.front.style.setProperty('--accent',meta.color); els.back.style.setProperty('--accent',meta.color);
+  els.frontBadge.textContent=card.c; els.backBadge.textContent=card.c;
+  const catCards=cards.filter(x=>x.c===card.c); const catN=catCards.indexOf(card)+1;
+  els.frontNum.textContent=`${catN} / ${catCards.length}`; els.backNum.textContent=els.frontNum.textContent;
+  els.frontTitle.textContent=card.t; els.backTitle.textContent=card.t; els.backAnswer.textContent=card.a; els.memoryCue.textContent=card.m;
+  els.card.classList.toggle('flipped',flipped); els.flip.textContent=flipped?'Hide answer':'Reveal';
+  els.counter.textContent=`${pos+1} of ${deck.length}`;
+  els.progress.style.width=`${((pos+1)/deck.length)*100}%`;
+  const knownCount=Object.values(status).filter(v=>v==='known').length;
+  els.mastery.textContent=`${knownCount} known`;
+  els.known.classList.toggle('active',status[idx]==='known');
+  els.review.classList.toggle('active',status[idx]==='review');
+  els.prev.disabled=deck.length<2; els.next.disabled=deck.length<2;
+}
+function flip(){flipped=!flipped;render()}
+function move(delta){pos=(pos+delta+deck.length)%deck.length;flipped=false;render()}
+function mark(value){const idx=deck[pos];status[idx]=status[idx]===value?null:value; if(!status[idx])delete status[idx];saveStatus();render()}
+function shuffle(){for(let i=deck.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[deck[i],deck[j]]=[deck[j],deck[i]];} pos=0;flipped=false;render()}
+function buildList(){
+  els.allCards.innerHTML=categories.map(cat=>{
+    const items=cards.map((c,i)=>({c,i})).filter(o=>o.c.c===cat.name).map((o,n)=>`<button class="jump" data-i="${o.i}">${n+1}. ${o.c.t}<span>${o.c.a}</span></button>`).join('');
+    return `<section class="categoryGroup"><h3>${cat.name}</h3><div class="cardList">${items}</div></section>`;
+  }).join('');
+  els.allCards.querySelectorAll('.jump').forEach(b=>b.addEventListener('click',()=>{
+    const globalIdx=Number(b.dataset.i); category='All categories';els.select.value=category;rebuildDeck();pos=deck.indexOf(globalIdx);render();closePanel();
+  }));
+}
+function openPanel(){els.panel.classList.add('open');document.body.style.overflow='hidden'}
+function closePanel(){els.panel.classList.remove('open');document.body.style.overflow=''}
+
+populateSelect();buildList();render();
+els.select.addEventListener('change',e=>{category=e.target.value;rebuildDeck()});
+els.shuffle.addEventListener('click',shuffle);
+els.card.addEventListener('click',flip);els.flip.addEventListener('click',flip);els.prev.addEventListener('click',()=>move(-1));els.next.addEventListener('click',()=>move(1));
+els.review.addEventListener('click',()=>mark('review'));els.known.addEventListener('click',()=>mark('known'));
+els.menu.addEventListener('click',openPanel);els.close.addEventListener('click',closePanel);els.panel.addEventListener('click',e=>{if(e.target===els.panel)closePanel()});
+els.card.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();flip()}else if(e.key==='ArrowRight')move(1);else if(e.key==='ArrowLeft')move(-1)});
+let touchX=null,touchY=null;
+els.wrap.addEventListener('touchstart',e=>{touchX=e.changedTouches[0].clientX;touchY=e.changedTouches[0].clientY},{passive:true});
+els.wrap.addEventListener('touchend',e=>{if(touchX===null)return;const dx=e.changedTouches[0].clientX-touchX,dy=e.changedTouches[0].clientY-touchY;if(Math.abs(dx)>65&&Math.abs(dx)>Math.abs(dy)*1.25){move(dx<0?1:-1)}touchX=touchY=null},{passive:true});
+document.addEventListener('keydown',e=>{if(e.key==='Escape')closePanel()});
+</script>
+</body>
+</html>
